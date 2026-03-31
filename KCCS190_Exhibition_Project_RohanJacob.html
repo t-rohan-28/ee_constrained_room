@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can't Fool the Climate</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+:root{
+  --bg:#0e0e0e;--surface:#181818;--s2:#202020;--s3:#252520;
+  --text:#e8e0d0;--dim:#a09888;--muted:#625a52;
+  --amber:#d4853a;--amberbg:rgba(212,133,58,.07);
+  --teal:#3a9b7f;--red:#b84a38;
+  --border:#262220;--borderl:#302c28;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;line-height:1.7;min-height:100vh}
+#root{min-height:100vh;display:flex;flex-direction:column}
+.wrap{max-width:720px;margin:0 auto;padding:3rem 2rem 5rem;width:100%;flex:1;transition:opacity .28s ease}
+/* progress */
+.prow{display:flex;align-items:center;gap:8px;margin-bottom:2.5rem;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--borderl)}
+.dot.on{background:var(--amber)}.dot.done{background:var(--muted)}
+/* type */
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+.display{font-size:52px;font-weight:300;letter-spacing:-.025em;line-height:1.05;margin-bottom:1.5rem}
+.roletag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.75rem}
+.scenario{font-size:20px;font-style:italic;line-height:1.8}
+.scenario p+p{margin-top:1.1rem}
+/* buttons */
+.btn{background:none;border:1px solid var(--borderl);color:var(--text);font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:.04em;padding:.65rem 1.8rem;cursor:pointer;transition:border-color .18s,background .18s,color .18s;display:inline-block}
+.btn:hover:not(:disabled){border-color:var(--dim)}
+.btn-a{border-color:var(--amber);color:var(--amber)}
+.btn-a:hover:not(:disabled){background:var(--amber);color:#0e0e0e}
+.btn:disabled{opacity:.22;cursor:not-allowed}
+.lnk{background:none;border:none;color:var(--muted);font-family:'Cormorant Garamond',serif;font-size:16px;cursor:pointer;padding:.65rem .5rem;text-decoration:underline;text-underline-offset:3px}
+.brow{display:flex;align-items:center;gap:1.5rem;margin-top:2.25rem;flex-wrap:wrap}
+/* scene banner */
+.scene-banner{width:100%;margin-bottom:2rem;border:1px solid var(--border);overflow:hidden}
+/* input */
+.cin{background:none;border:none;border-bottom:1px solid var(--borderl);color:var(--text);font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;padding:.4rem 0;width:100%;max-width:460px;outline:none;text-align:center;transition:border-color .2s}
+.cin:focus{border-color:var(--amber)}.cin::placeholder{color:var(--muted)}
+/* actor card */
+.acard{border:1px solid var(--border);background:var(--surface);padding:1.4rem 1.6rem;margin-bottom:1.1rem}
+.acard.offset{margin-left:2rem;border-style:dashed;border-color:var(--borderl)}
+.ahead{display:flex;gap:1.25rem;align-items:flex-start;margin-bottom:1.1rem}
+.aname{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--amber);margin-bottom:.2rem}
+.atag{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:.75rem}
+.atext{font-size:17px;line-height:1.75;margin-bottom:1rem}
+.pbgrid{display:flex;flex-direction:column;gap:.4rem}
+.pbbtn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;padding:.45rem .9rem;cursor:pointer;text-align:left;transition:border-color .18s,color .18s;width:100%}
+.pbbtn:hover:not(.used){border-color:var(--borderl);color:var(--dim)}
+.pbbtn.used{color:var(--border);cursor:default;font-style:normal;border-color:var(--border)}
+.pbres{margin-top:.65rem;padding:.9rem 1.1rem;background:var(--s2);border-left:2px solid var(--muted);font-size:15px;line-height:1.75;font-style:italic;color:var(--dim);animation:fi .3s ease}
+.footnote{margin-top:.5rem;padding:.4rem .7rem;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);opacity:.7;border-left:1px solid var(--amber);font-style:normal}
+/* choices */
+.clist{display:flex;flex-direction:column;gap:.9rem;margin:1.75rem 0}
+.ccard{border:1px solid var(--border);background:var(--surface);padding:1.1rem 1.4rem;cursor:pointer;display:flex;gap:1.1rem;align-items:flex-start;transition:border-color .18s,background .18s}
+.ccard:hover{border-color:var(--borderl);background:var(--s2)}
+.cltr{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);flex-shrink:0;margin-top:3px}
+.clbl{font-size:18px;margin-bottom:.15rem}
+.cdsc{font-size:14px;color:var(--muted)}
+/* confirm */
+.cfbox{border:1px solid var(--borderl);background:var(--surface);padding:1.8rem 2rem;margin:1.75rem 0}
+.cfnote{font-size:13px;color:var(--muted);font-style:italic;margin-top:1rem}
+/* dashboard */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.85rem;margin:1.25rem 0 2.25rem}
+.metric{background:var(--surface);border:1px solid var(--border);padding:1rem 1.1rem}
+.mlbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.mval{font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:500;line-height:1;transition:color 1s ease}
+.mdlt{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:.25rem}
+.mhnt{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:.15rem}
+/* supply chain */
+.schain{display:flex;align-items:center;gap:.6rem;margin:1.25rem 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.07em;flex-wrap:wrap}
+.scnode{border:1px solid var(--border);padding:.3rem .6rem;color:var(--dim)}
+.scarr{color:var(--amber)}
+/* role shift */
+.divider{border:none;border-top:1px solid var(--border);margin:2rem 0}
+.rs{opacity:0;transition:opacity .8s ease}.rs.show{opacity:1}
+.rstext{font-size:18px;font-style:italic;line-height:1.85;color:var(--dim)}
+.ctw{opacity:0;transition:opacity .6s ease;pointer-events:none;margin-top:1.75rem}
+.ctw.show{opacity:1;pointer-events:all}
+/* farmer dashboard */
+.fdash{background:#080c10;border:1px solid #1a2030;padding:2rem 2.25rem;margin:1.5rem 0}
+.fdash-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#405060;margin-bottom:1.5rem}
+.frow{display:flex;flex-direction:column;gap:1.1rem}
+.fitem{font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:1.6}
+.fkey{color:#405060;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem}
+.fval{color:#a0b0c0}
+.fval.alert{color:var(--amber)}
+/* survey */
+.survey{background:#0e0e0a;border:1px solid #28281e;padding:2rem 2.25rem;margin:1.5rem 0;font-family:'IBM Plex Mono',monospace}
+.shead{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#505040;margin-bottom:1.25rem}
+.sq{font-size:14px;color:#a0a090;margin-bottom:1.5rem;font-style:normal;line-height:1.7}
+.sopts{display:flex;flex-direction:column;gap:.75rem}
+.sopt{display:flex;align-items:flex-start;gap:.75rem;font-size:13px;line-height:1.5}
+.sopt-disabled{color:#404038;cursor:not-allowed}
+.sopt-ticked{color:#c0b890}
+.scheckbox{width:14px;height:14px;border:1px solid #404038;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.scheckbox.ticked{border-color:#a09858;color:#c0b890}
+/* whats real */
+.wrpanel{border-left:3px solid var(--amber);background:var(--surface);padding:2rem 2.25rem}
+.wrhead{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:1.75rem}
+.wrsec{margin-bottom:1.5rem}
+.wrlbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.wrtext{font-size:17px;line-height:1.8}
+/* report */
+.csummary{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:2.4;color:var(--dim)}
+.csummary strong{color:var(--text);font-weight:500}
+.dcards{display:flex;flex-direction:column;gap:.85rem;margin:2.25rem 0}
+.dcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);padding:1.1rem 1.4rem;font-size:17px;line-height:1.65}
+.dsrc{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:.5rem}
+.portrait{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2.25rem 0;margin:2.25rem 0;font-size:20px;font-style:italic;line-height:1.85;color:var(--dim)}
+.closing{font-size:24px;font-style:italic;font-weight:300;line-height:1.55;text-align:center;padding:2.75rem 1rem;color:var(--text)}
+/* reflection */
+.rq{font-size:22px;font-style:italic;line-height:1.7;margin-bottom:1.75rem}
+.rarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Cormorant Garamond',serif;font-size:18px;line-height:1.65;padding:1.1rem;resize:none;height:110px;outline:none;transition:border-color .2s}
+.rarea:focus{border-color:var(--amber)}
+.rct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-align:right;margin-top:.4rem}
+.tbar{height:2px;background:var(--border);margin:1.1rem 0 0;overflow:hidden}
+.tfill{height:100%;background:var(--amber);transition:width 1s linear}
+/* done */
+.donewrap{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:65vh;text-align:center;gap:1.5rem}
+.opening{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:8rem}
+/* portrait img */
+.portrait-img{width:80px;height:95px;flex-shrink:0}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:560px){.wrap{padding:2rem 1.25rem 4rem}.display{font-size:36px}.dgrid{grid-template-columns:repeat(2,1fr)}.acard.offset{margin-left:.5rem}.portrait-img{width:60px;height:71px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+// ─── PORTRAITS ────────────────────────────────────────────
+const InvestorSVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L35 67L40 60L45 67L54 54Q66 57 75 64V95Z" fill="#1c2840"/>
+  <path d="M35 67L40 60L45 67L44 95H36Z" fill="#f0efe8"/>
+  <path d="M40 60L37.5 72L40 78L42.5 72Z" fill="#991515"/>
+  <rect x="34" y="49" width="12" height="13" fill="#d4a878"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#d4a878"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#c49868"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#c49868"/>
+  <path d="M23 25Q40 10 57 25Q54 17 40 15Q26 17 23 25Z" fill="#180e04"/>
+  <path d="M29 23L36 22.5" stroke="#180e04" strokeWidth="1.5" fill="none"/>
+  <path d="M44 22.5L51 23" stroke="#180e04" strokeWidth="1.5" fill="none"/>
+  <circle cx="33" cy="29" r="3.5" fill="white"/><circle cx="34" cy="29" r="2" fill="#111"/>
+  <circle cx="47" cy="29" r="3.5" fill="white"/><circle cx="48" cy="29" r="2" fill="#111"/>
+  <path d="M27 39Q40 52 53 39Q40 45 27 39Z" fill="white"/>
+  <path d="M27 39Q40 52 53 39" stroke="#111" strokeWidth="1.5" fill="none"/>
+  <path d="M28 43Q40 49 52 43" stroke="#c09068" strokeWidth="1" fill="none"/>
+  <circle cx="27" cy="38" r="4" fill="#e09060" opacity="0.2"/>
+  <circle cx="53" cy="38" r="4" fill="#e09060" opacity="0.2"/>
+</svg>
+);
+
+const Activist1SVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L40 62L54 54Q66 57 75 64V95Z" fill="#3a4828"/>
+  <rect x="34" y="49" width="12" height="13" fill="#9a6030"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#9a6030"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#885220"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#885220"/>
+  <ellipse cx="40" cy="20" rx="19" ry="13" fill="#180a02"/>
+  <ellipse cx="40" cy="22" rx="17" ry="11" fill="#1e0e04"/>
+  <path d="M29 24L36 23" stroke="#180a02" strokeWidth="1.8" fill="none"/>
+  <path d="M44 22L51 23.5" stroke="#180a02" strokeWidth="1.8" fill="none"/>
+  <circle cx="33" cy="30" r="3.2" fill="white"/><circle cx="33.8" cy="30" r="1.9" fill="#111"/>
+  <circle cx="47" cy="30" r="3.2" fill="white"/><circle cx="47.8" cy="30" r="1.9" fill="#111"/>
+  <path d="M33 41Q40 44 47 41" stroke="#111" strokeWidth="1.5" fill="none"/>
+</svg>
+);
+
+const AgriCorpSVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L40 62L54 54Q66 57 75 64V95Z" fill="#1840a0"/>
+  <path d="M30 54L40 62L50 54L52 64H28Z" fill="#f5f5f0"/>
+  <rect x="34" y="51" width="12" height="12" fill="#f0d8b8"/>
+  <ellipse cx="40" cy="37" rx="17" ry="17" fill="#f0d8b8"/>
+  <ellipse cx="23" cy="37" rx="3" ry="4" fill="#e0c8a8"/>
+  <ellipse cx="57" cy="37" rx="3" ry="4" fill="#e0c8a8"/>
+  <path d="M24 34Q40 22 56 34Q54 27 40 25Q26 27 24 34Z" fill="#8a6030"/>
+  <ellipse cx="40" cy="26" rx="24" ry="8" fill="#f0c020"/>
+  <rect x="16" y="24" width="48" height="8" fill="#f0c020"/>
+  <rect x="14" y="30" width="52" height="5" rx="1" fill="#d4a800"/>
+  <path d="M30 27L35 24L45 24L50 27" stroke="#d4a800" strokeWidth="1" fill="none"/>
+  <path d="M29 27L36 26" stroke="#111" strokeWidth="1.5" fill="none"/>
+  <path d="M44 26L51 27" stroke="#111" strokeWidth="1.5" fill="none"/>
+  <circle cx="33" cy="34" r="3" fill="white"/><circle cx="33.8" cy="34" r="1.7" fill="#111"/>
+  <circle cx="47" cy="34" r="3" fill="white"/><circle cx="47.8" cy="34" r="1.7" fill="#111"/>
+  <path d="M33 44Q40 48 47 44" stroke="#111" strokeWidth="1.5" fill="none"/>
+</svg>
+);
+
+const FarmerSVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L40 62L54 54Q66 57 75 64V95Z" fill="#7a4828"/>
+  <rect x="34" y="49" width="12" height="13" fill="#b07840"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#b07840"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#a06830"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#a06830"/>
+  <path d="M24 27Q40 14 56 27Q54 19 40 17Q26 19 24 27Z" fill="#180a02"/>
+  <path d="M29 25L36 24.5" stroke="#180a02" strokeWidth="1.5" fill="none"/>
+  <path d="M44 24.5L51 25" stroke="#180a02" strokeWidth="1.5" fill="none"/>
+  <circle cx="33" cy="30" r="3" fill="white"/><circle cx="33.8" cy="30" r="1.8" fill="#111"/>
+  <circle cx="47" cy="30" r="3" fill="white"/><circle cx="47.8" cy="30" r="1.8" fill="#111"/>
+  <path d="M33 41Q40 44.5 47 41" stroke="#111" strokeWidth="1.5" fill="none"/>
+</svg>
+);
+
+const MinisterSVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L35 67L40 60L45 67L54 54Q66 57 75 64V95Z" fill="#1c2840"/>
+  <path d="M35 67L40 60L45 67L44 95H36Z" fill="#f0efe8"/>
+  <path d="M40 60L37.5 72L40 78L42.5 72Z" fill="#2a4a8a"/>
+  <rect x="22" y="58" width="8" height="3" fill="#f0efe8"/>
+  <rect x="34" y="49" width="12" height="13" fill="#e8c0a0"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#e8c0a0"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#d8b090"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#d8b090"/>
+  <path d="M23 26Q40 11 57 26Q54 18 40 16Q26 18 23 26Z" fill="#acacac"/>
+  <path d="M23 26Q26 21 40 20Q54 21 57 26Q48 23 40 23Q32 23 23 26Z" fill="#c8c8c8"/>
+  <rect x="26" y="28" width="12" height="7" rx="2" fill="none" stroke="#333" strokeWidth="1.5"/>
+  <rect x="42" y="28" width="12" height="7" rx="2" fill="none" stroke="#333" strokeWidth="1.5"/>
+  <line x1="38" y1="31.5" x2="42" y2="31.5" stroke="#333" strokeWidth="1.2"/>
+  <circle cx="32.5" cy="31.5" r="1.5" fill="#444"/>
+  <circle cx="47.5" cy="31.5" r="1.5" fill="#444"/>
+  <path d="M29 24L36 23.5" stroke="#888" strokeWidth="1.5" fill="none"/>
+  <path d="M44 23.5L51 24" stroke="#888" strokeWidth="1.5" fill="none"/>
+  <path d="M32 41Q40 44.5 48 41" stroke="#111" strokeWidth="1.5" fill="none"/>
+  <circle cx="32" cy="40.5" r="1.5" fill="#c09068" opacity="0.2"/>
+  <circle cx="48" cy="40.5" r="1.5" fill="#c09068" opacity="0.2"/>
+</svg>
+);
+
+const PSRepSVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L35 67L40 60L45 67L54 54Q66 57 75 64V95Z" fill="#2a3a50"/>
+  <path d="M35 67L40 60L45 67L44 95H36Z" fill="#f0efe8"/>
+  <g transform="rotate(12,40,68)"><path d="M40 60L37.5 72L40 78L42.5 72Z" fill="#3a8a4a"/></g>
+  <rect x="34" y="49" width="12" height="13" fill="#d8a870"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#d8a870"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#c89860"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#c89860"/>
+  <path d="M24 27Q40 11 56 27Q53 18 40 16Q27 18 24 27Z" fill="#1a0e04"/>
+  <path d="M24 27Q28 20 40 19Q52 20 56 27Q50 22 40 21Q30 22 24 27Z" fill="#2a1808"/>
+  <path d="M29 24L36 23" stroke="#1a0e04" strokeWidth="1.5" fill="none"/>
+  <path d="M44 23.5L51 24.5" stroke="#1a0e04" strokeWidth="1.5" fill="none"/>
+  <circle cx="33" cy="30" r="3.5" fill="white"/><circle cx="34" cy="30" r="2" fill="#111"/>
+  <circle cx="47" cy="30" r="3.5" fill="white"/><circle cx="48" cy="30" r="2" fill="#111"/>
+  <path d="M26 39Q40 53 54 39Q40 46 26 39Z" fill="white"/>
+  <path d="M26 39Q40 53 54 39" stroke="#111" strokeWidth="1.5" fill="none"/>
+  <path d="M27 43Q40 50 53 43" stroke="#c09060" strokeWidth="1" fill="none"/>
+  <circle cx="26" cy="38" r="4" fill="#e09050" opacity="0.18"/>
+  <circle cx="54" cy="38" r="4" fill="#e09050" opacity="0.18"/>
+</svg>
+);
+
+const Activist3SVG=()=>(
+<svg viewBox="0 0 80 95" className="portrait-img" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 95V64Q14 57 26 54L40 62L54 54Q66 57 75 64V95Z" fill="#2a2040"/>
+  <rect x="34" y="49" width="12" height="13" fill="#7a4018"/>
+  <ellipse cx="40" cy="33" rx="17" ry="19" fill="#7a4018"/>
+  <ellipse cx="23" cy="33" rx="3" ry="4.5" fill="#6a3010"/>
+  <ellipse cx="57" cy="33" rx="3" ry="4.5" fill="#6a3010"/>
+  <ellipse cx="40" cy="20" rx="18" ry="12" fill="#0e0806"/>
+  <path d="M22 23Q28 15 40 13Q52 15 58 23" fill="none" stroke="#180a02" strokeWidth="3"/>
+  <path d="M24 30Q22 24 24 20" stroke="#0e0806" strokeWidth="3" fill="none"/>
+  <path d="M56 30Q58 24 56 20" stroke="#0e0806" strokeWidth="3" fill="none"/>
+  <path d="M29 24.5L36 24" stroke="#0e0806" strokeWidth="1.8" fill="none"/>
+  <path d="M44 24L51 24.5" stroke="#0e0806" strokeWidth="1.8" fill="none"/>
+  <circle cx="33" cy="30" r="3.2" fill="white"/><circle cx="33.8" cy="30" r="1.9" fill="#111"/>
+  <circle cx="47" cy="30" r="3.2" fill="white"/><circle cx="47.8" cy="30" r="1.9" fill="#111"/>
+  <path d="M33 41Q40 44 47 41" stroke="#111" strokeWidth="1.5" fill="none"/>
+</svg>
+);
+
+const PORTRAITS={investor:InvestorSVG,activist1:Activist1SVG,agricorp:AgriCorpSVG,farmer:FarmerSVG,minister:MinisterSVG,psrep:PSRepSVG,activist3:Activist3SVG};
+
+// ─── SCENE ILLUSTRATIONS ─────────────────────────────────
+const Scene1 = () => (
+  <img 
+    src="https://www.gutenberg.org/cache/epub/36141/images/074-1200.png" 
+    className="scene-banner" 
+    style={{ 
+      width: '100%', 
+      height: '500px', 
+      objectFit: 'contain',
+      objectPosition: 'center',
+      display: 'block',
+      backgroundColor: '#0a0a0a',
+      padding: '10px',
+      filter: 'contrast(5) brightness(0.95)',
+      borderRadius: '2px'
+    }} 
+    alt="Energy Scene" 
+  />
+);
+
+const Scene2 = () => (
+  <img 
+    src="https://platform.vox.com/wp-content/uploads/sites/2/2024/07/CoeEggMachines-crop.jpg?quality=90&strip=all&crop=0,0,100,100" 
+    className="scene-banner" 
+    style={{ 
+      width: '100%', 
+      height: '500px', 
+      objectFit: 'contain',
+      objectPosition: 'center',
+      display: 'block',
+      backgroundColor: '#0a0a0a',
+      padding: '10px',
+      borderRadius: '2px'
+    }} 
+    alt="Energy Scene" 
+  />
+);
+
+const Scene3 = () => (
+  <img 
+    src="https://i.guim.co.uk/img/media/52316bbcb6375246a95c6cd902477019ea56ee56/0_367_2560_1537/master/2560.jpg?width=1200&height=900&quality=85&auto=format&fit=crop&s=ca9c2b8735269aba7cd8eba7db8fb50f" 
+    className="scene-banner" 
+    style={{ 
+      width: '100%', 
+      height: '500px', 
+      objectFit: 'contain',
+      objectPosition: 'center',
+      display: 'block',
+      backgroundColor: '#0a0a0a',
+      padding: '10px',
+      borderRadius: '2px'
+    }} 
+    alt="Energy Scene" 
+  />
+);
+
+const SCENES=[Scene1,Scene2,Scene3];
+
+// ─── GAME DATA ───────────────────────────────────────────
+const INIT={gdp:50,emissions:50,inequality:50,debt:30,energyAccess:40,foodSecurity:55,justiceIndex:50};
+const rv=(v,cn)=>typeof v==='function'?v(cn):v;
+
+const ROUNDS=[
+{
+  id:1,short:"Energy Decision",
+  roleTitle:cn=>`You are the Energy Minister of ${cn}`,
+  scenario:cn=>`A company wants to dig up ${cn}'s coal reserves. Your people need the electricity. You have two arguments to hear and one decision to make.\n\nThe investors are already in the room.`,
+  actors:[
+    {
+      key:'investor',portrait:'investor',offset:false,
+      name:"The Investor",
+      tag:"Has never personally visited a coal mine.",
+      opening:`Look — I'll be straight with you. We're not the bad guys. We want a carbon tax — charge us, we'll adapt, everyone wins. The renewables guys say we're stalling. We're not stalling. We're building the bridge while they're still arguing about the other side.`,
+      pbs:[
+        {q:"What about the long-term climate cost?",
+         a:cn=>`Price it right, innovation follows. That's history, not theory. And ${cn} can't wait for perfect. Your people need power now.`,
+         fn:"His firm lobbied against carbon pricing in four countries last year."},
+        {q:"Who actually benefits most from this deal?",
+         a:`Both of us. That's the point. Mutual benefit is not exploitation.`,
+         fn:cn=>`${cn}'s share of mineral revenues: 12%. Duration of contract: 40 years.`}
+      ]
+    },
+    {
+      key:'activist1',portrait:'activist1',offset:false,
+      name:"The Climate Activist",
+      tag:"Was not offered coffee.",
+      opening:`He's very good at that speech. I've heard it in Jakarta, in Nairobi, in Lima. Ask him who built the bridge. Ask him who paid for it.`,
+      pbs:[
+        {q:"But people need electricity now.",
+         a:`They do. And the data shows most improvements in health, literacy, infant mortality happen at very low energy levels — far below what this deal delivers.`,
+         fn:null},
+        {q:"Isn't a carbon tax a reasonable compromise?",
+         a:`It's reasonable when the price is honest and the revenue reaches people. Ask him what price he's proposing. Ask him where the money goes.`,
+         fn:null}
+      ]
+    }
+  ],
+  choices:[
+    {id:'A',label:"Accept the coal deal",desc:"Revenue and emissions, now"},
+    {id:'B',label:"Pursue renewables",desc:"International finance — more debt, slower growth, donor conditions"},
+    {id:'C',label:"Domestic development only",desc:"More autonomous, less growth, neither side satisfied"}
+  ],
+  roleShiftType:'farmer',
+  roleShift:()=>`Her name is not in any of these documents. Her village sits 400 kilometres from the capital, above the coal deposit. She was not consulted. Whatever you chose, the infrastructure will cross her land. The compensation process has not started. She heard about the decision on a neighbour's radio.`,
+  rsDelay:5,
+  supplyChain:null,
+  wr:{
+    saw:"A government choosing between growth and climate responsibility.",
+    truth:"The coal option arrived pre-financed because the fossil fuel industry spent 150 years building that infrastructure. The renewable option was slower and more expensive because nobody spent 150 years making it easy.",
+    thinkers:"One view: price carbon, markets adapt. The other: the market didn't fail here — it worked exactly as designed, for the people who designed it."
+  },
+  cons:{
+    A:{gdp:15,emissions:20,inequality:8,debt:-5,energyAccess:20,foodSecurity:2,justiceIndex:-10,flags:{coalDeal:true}},
+    B:{gdp:-5,emissions:-8,inequality:-3,debt:15,energyAccess:10,foodSecurity:2,justiceIndex:5,flags:{renewableDebt:true}},
+    C:{gdp:3,emissions:5,inequality:2,debt:5,energyAccess:8,foodSecurity:2,justiceIndex:0,flags:{}}
+  }
+},
+{
+  id:2,short:"Food System",
+  roleTitle:cn=>`You are the Trade Minister of ${cn}`,
+  scenario:(cn,gs)=>{
+    const pd=gs.choices[0]==='A'?`The same investors from your energy decision are back. Your coal deal gave them a foothold. Industrial agriculture is arriving pre-financed. `
+      :gs.choices[0]==='B'?`The debt from your renewable transition has limited your budget. You can't subsidise small farmers as generously as you'd want. `
+      :`Both the fossil lobby and the climate groups are watching your last decision. You've made neither ally. `;
+    return `${pd}An agricultural company wants to build industrial livestock farms in ${cn}. It promises cheap meat, jobs, and export revenue. Small farmers say it will destroy their livelihoods.`;
+  },
+  actors:[
+    {
+      key:'agricorp',portrait:'agricorp',offset:false,
+      name:"AgriCorp Representative",
+      tag:"Flew in this morning. Flies out tonight.",
+      opening:`Meat consumption rises with income — that's every country that ever industrialised. We produce protein efficiently, keep prices low. If you don't approve this, a competitor country will. You'll import the meat anyway, without the jobs.`,
+      pbs:[
+        {q:"What about the environmental impact?",
+         a:`Per kilogram of protein, we use less land than traditional farming. Efficiency is what makes sustainability possible.`,
+         fn:"This calculation excludes the Brazilian soy fields supplying the grain."},
+        {q:"What happens to the small farmers?",
+         a:`Some consolidation is inevitable. Net jobs created exceeds net jobs lost. That's the history of industrialisation.`,
+         fn:"Displaced farmers are classified as 'self-employed'. They don't appear in this calculation."}
+      ]
+    },
+    {
+      key:'farmer',portrait:'farmer',offset:false,
+      name:"Small Farmer / Activist",
+      tag:"Has farmed this land for 20 years.",
+      opening:`Ten kilos of grain, one kilo of meat. That grain, water, and land disappears before a single meal. My farm fed my neighbours. This facility feeds export markets. When the soil's exhausted, they leave. We stay.`,
+      pbs:[
+        {q:"But isn't cheaper meat a good thing?",
+         a:cn=>`Affordable for whom? The meat from this facility won't reach the food-insecure in ${cn}. It goes to export markets and wealthier consumers.`,
+         fn:null},
+        {q:"Can't regulations make this safer?",
+         a:`Who enforces them? The same ministry approving the facility. The same political system the investors just finished lobbying.`,
+         fn:null}
+      ]
+    }
+  ],
+  choices:[
+    {id:'A',label:"Approve the industrial facility",desc:"Revenue and jobs, significant environmental cost"},
+    {id:'B',label:"Invest in small farms",desc:"Less revenue, more equitable, slower growth"},
+    {id:'C',label:"Approve a regulated facility",desc:"A compromise — with all the weaknesses of one"}
+  ],
+  roleShiftType:'survey',
+  roleShift:cn=>``,
+  rsDelay:5,
+  supplyChain:cn=>[cn,"Brazil","Former forest"],
+  wr:{
+    saw:"A government weighing food security against environmental cost.",
+    truth:"Industrial meat is cheap because someone else pays the cost — in water, soil, and deforestation that doesn't appear on the invoice. The people paying it are rarely the people eating it.",
+    thinkers:null
+  },
+  cons:{
+    A:{gdp:12,emissions:18,inequality:10,debt:0,energyAccess:0,foodSecurity:8,justiceIndex:-8,flags:{industrialAgApproved:true}},
+    B:{gdp:-3,emissions:-5,inequality:-5,debt:8,energyAccess:0,foodSecurity:5,justiceIndex:8,flags:{}},
+    C:{gdp:4,emissions:6,inequality:3,debt:3,energyAccess:0,foodSecurity:6,justiceIndex:2,flags:{}}
+  }
+},
+{
+  id:3,short:"Climate Negotiation",
+  roleTitle:cn=>`You are the delegate of ${cn}`,
+  scenario:(cn,gs)=>{
+    const r1=gs.choices[0]==='A'?'accepted the coal deal':gs.choices[0]==='B'?'chose the renewable path':'chose domestic-only development';
+    const r2=gs.choices[1]==='A'?'approved industrial agriculture':gs.choices[1]==='B'?'invested in small farms':'approved a regulated facility';
+    return `An international climate summit. Rich countries are offering money to help with climate adaptation — with conditions attached. You've been in this room before. The offers have never quite been what they seemed.\n\n${cn} ${r1} and ${r2}. Everyone in this room has read that record.`;
+  },
+  actors:[
+    {
+      key:'minister',portrait:'minister',offset:false,
+      name:"Rich Nation Finance Minister",
+      tag:"Very concerned about accountability. Especially yours.",
+      opening:`We're offering substantial finance with accountability conditions. Carbon markets are the most efficient mechanism available — the economics is sound. This is not ideology. It's pragmatism.`,
+      pbs:[
+        {q:"Your countries caused this crisis. Why are your conditions the ones that matter?",
+         a:`Historical emissions are sunk costs. What matters is the most efficient path forward. Conditioning finance on accountability is due diligence — we owe it to our taxpayers.`,
+         fn:cn=>`His country's per capita emissions: 14.2 tonnes. ${cn}'s: 1.8 tonnes.`},
+        {q:"Who designed the carbon market you're describing?",
+         a:`Economists, policymakers, international institutions — based on decades of evidence.`}
+      ]
+    },
+    {
+      key:'psrep',portrait:'psrep',offset:true,
+      name:"Private Sector Representative",
+      tag:"Not sure why he's here either.",
+      opening:`Carbon credits create a market. Markets create investment. Investment creates technology. Give us a clear price signal — we'll deliver what no public programme has managed.`,
+      pbs:[
+        {q:"Why is the private sector at a government negotiating table?",
+         a:`Because we finance the solutions. The renewable transition you want requires trillions in private capital. You can't get there without us.`,
+         fn:"His firm purchased 2 million carbon credits last year. Retired zero."},
+        {q:"Who profits from carbon credits?",
+         a:`Companies that reduce emissions most efficiently. That's how it should work. The alternative is central planning.`}
+      ]
+    },
+    {
+      key:'activist3',portrait:'activist3',offset:false,
+      name:"Activist from the Global South",
+      tag:"",
+      opening:`The countries that industrialised for 150 years are offering loans to the countries now drowning because of it. That is not generosity. That is asking someone to pay for a fire they didn't start.`,
+      pbs:[
+        {q:cn=>`But ${cn} needs the money now — can we afford to refuse?`,
+         a:`That is exactly the bind. The system is designed so that refusal is almost impossible. A constrained choice is not a free one.`,
+         fn:null},
+        {q:"What does 'justice' actually look like in practice?",
+         a:cn=>`Transfers without conditions. Debt cancellation. ${cn}'s right to develop the same way the countries imposing conditions once did.`,
+         fn:null}
+      ]
+    }
+  ],
+  choices:[
+    {id:'A',label:"Accept the finance terms",desc:"Money now, with conditions attached"},
+    {id:'B',label:"Demand reparations",desc:"A principled stand — with real costs"},
+    {id:'C',label:"Join a coalition of nations",desc:"Collective resistance — uncertain outcomes"}
+  ],
+  roleShiftType:'portrait',
+  roleShift:()=>`There is a farmer in Bangladesh. Her country produces 0.64 tonnes of CO₂ per person per year. The United States produces 14.2. Her crops failed this year because of temperature increases her country did not create. She is not a delegate. She is the reason this room exists. She will not speak today.`,
+  rsDelay:8,
+  supplyChain:null,
+  wr:{
+    saw:"A negotiations about money and responsibility.",
+    truth:"More than 70% of international climate finance is delivered as loans. The countries least responsible for the crisis are being asked to borrow their way through it.",
+    thinkers:"One view: price carbon correctly and the solution emerges. The other: these countries aren't a market failure to be corrected — they're evidence the system worked, just not for them."
+  },
+  cons:{
+    A:{gdp:5,emissions:-3,inequality:-2,debt:-10,energyAccess:5,foodSecurity:3,justiceIndex:-5,flags:{}},
+    B:{gdp:-8,emissions:-2,inequality:-8,debt:10,energyAccess:0,foodSecurity:-2,justiceIndex:15,flags:{}},
+    C:{gdp:-3,emissions:-5,inequality:-5,debt:5,energyAccess:3,foodSecurity:2,justiceIndex:12,flags:{coalitionFormed:true}}
+  }
+}
+];
+
+const CHOICE_LABELS=[
+  {A:"accepted the coal deal",B:"chose the renewable path",C:"chose domestic-only development"},
+  {A:"approved the industrial facility",B:"invested in small farms",C:"approved a regulated facility"},
+  {A:"accepted the finance terms",B:"demanded reparations",C:"joined a coalition"}
+];
+
+const METRICS=[
+  {k:'gdp',lbl:'GDP Index',hint:'higher = better',goodUp:true},
+  {k:'emissions',lbl:'CO₂ Emissions',hint:'lower = better',goodUp:false},
+  {k:'inequality',lbl:'Inequality',hint:'lower = better',goodUp:false},
+  {k:'debt',lbl:'National Debt',hint:'lower = better',goodUp:false},
+  {k:'energyAccess',lbl:'Energy Access',hint:'% electrified',goodUp:true},
+  {k:'foodSecurity',lbl:'Food Security',hint:'higher = better',goodUp:true},
+  {k:'justiceIndex',lbl:'Justice Index',hint:'higher = better',goodUp:true}
+];
+
+// ─── APP ─────────────────────────────────────────────────
+function App(){
+  const [screen,setScreen]=useState('opening');
+  const [op,setOp]=useState(1);
+  const [inp,setInp]=useState('');
+  const [cn,setCn]=useState('');
+  const [round,setRound]=useState(1);
+  const [choices,setChoices]=useState([null,null,null]);
+  const [flags,setFlags]=useState({coalDeal:false,renewableDebt:false,industrialAgApproved:false,coalitionFormed:false});
+  const [dash,setDash]=useState({...INIT});
+  const [disp,setDisp]=useState({...INIT});
+  const [prevDash,setPrevDash]=useState(null);
+  const [animating,setAnimating]=useState(false);
+  const [pending,setPending]=useState(null);
+  const [pbsUsed,setPbsUsed]=useState({});
+  const [rsShow,setRsShow]=useState(false);
+  const [ctShow,setCtShow]=useState(false);
+  const [farmerTimer,setFarmerTimer]=useState(false);
+  const [reflection,setReflection]=useState('');
+  const [timerPct,setTimerPct]=useState(100);
+  const animRef=useRef(null);
+  const rd=ROUNDS[round-1];
+  const gs={choices,flags};
+
+  const nav=useCallback((to)=>{
+    setOp(0);
+    setTimeout(()=>{
+      setScreen(to);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>setOp(1)));
+    },280);
+  },[]);
+
+  // animate dashboard numbers
+  useEffect(()=>{
+    if(!animating||!prevDash)return;
+    const from={...prevDash},to={...dash},dur=1000,t0=Date.now();
+    const tick=()=>{
+      const p=Math.min((Date.now()-t0)/dur,1),e=1-Math.pow(1-p,3),cur={};
+      for(const k of Object.keys(to))cur[k]=Math.round(from[k]+(to[k]-from[k])*e);
+      setDisp(cur);
+      if(p<1)animRef.current=requestAnimationFrame(tick);
+      else{setAnimating(false);setDisp({...to});}
+    };
+    animRef.current=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(animRef.current);
+  },[animating]);
+
+  // role shift reveal timing
+  useEffect(()=>{
+    if(screen!=='roleshift')return;
+    setRsShow(false);setCtShow(false);setFarmerTimer(false);
+    const t1=setTimeout(()=>setRsShow(true),500);
+    const t2=setTimeout(()=>{setCtShow(true);setFarmerTimer(true);},(rd.rsDelay+0.5)*1000);
+    return()=>{clearTimeout(t1);clearTimeout(t2);};
+  },[screen,round]);
+
+  // reflection timer
+  useEffect(()=>{
+    if(screen!=='reflection')return;
+    setTimerPct(100);const dur=30000,t0=Date.now();
+    const id=setInterval(()=>setTimerPct(Math.max(0,(1-(Date.now()-t0)/dur)*100)),200);
+    return()=>clearInterval(id);
+  },[screen]);
+
+  const confirmChoice=()=>{
+    const c={...rd.cons[pending]};
+    if(round===2){
+      if(flags.coalDeal&&pending==='A'){c.gdp+=5;c.emissions+=5;}
+      if(flags.renewableDebt&&pending==='B'){c.debt+=5;}
+    }
+    const newDash={};
+    for(const k of Object.keys(INIT))newDash[k]=Math.max(0,Math.min(100,dash[k]+c[k]));
+    const nc=[...choices];nc[round-1]=pending;
+    setChoices(nc);
+    setFlags(prev=>({...prev,...rd.cons[pending].flags}));
+    setPrevDash({...disp});setDash(newDash);setAnimating(true);
+    nav('dashboard');
+  };
+
+  const afterWhatsReal=()=>{
+    if(round<3){setRound(r=>r+1);nav('scenario');}
+    else nav('report');
+  };
+
+  const getPortrait=()=>{
+    const ed=dash.emissions-INIT.emissions,id=dash.inequality-INIT.inequality,dd=dash.debt-INIT.debt;
+    const ew=ed>5?'higher':ed<-5?'lower':'similar';
+    const iw=id>5?'widened':id<-5?'narrowed':'remained stable';
+    const dw=dd>5?'grew':dd<-5?'shrank':'held';
+    const jw=dash.justiceIndex>65?'changed — though not from decisions made in rooms like this.':'did not change.';
+    return `${cn} ends this simulation with ${ew} emissions than it began. Its inequality ${iw}. Its debt ${dw}. The farmer outside the negotiating room is still there. Her situation ${jw}`;
+  };
+
+  const Prog=({title})=>(
+    <div className="prow">
+      {[1,2,3].map(i=><span key={i} className={`dot${i<round?' done':i===round?' on':''}`}/>)}
+      <span style={{marginLeft:'4px'}}>{title}</span>
+    </div>
+  );
+
+  // ── OPENING ──
+  if(screen==='opening')return(
+    <div className="wrap" style={{opacity:op}}>
+      <div className="opening">
+        <p className="eyebrow" style={{letterSpacing:'.22em',marginBottom:'3.5rem'}}>THE CONSTRAINED ROOM</p>
+        <h1 className="display" style={{fontSize:'54px',textAlign:'center',marginBottom:'3rem'}}>What is your<br/>country called?</h1>
+        <input className="cin" placeholder="Enter a name." value={inp}
+          onChange={e=>setInp(e.target.value)}
+          onKeyDown={e=>{if(e.key==='Enter'&&inp.trim()){setCn(inp.trim());nav('scenario');}}}
+          autoFocus/>
+        <div style={{marginTop:'2.5rem'}}>
+          <button className="btn btn-a" disabled={!inp.trim()}
+            onClick={()=>{setCn(inp.trim());nav('scenario');}}>Begin</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── SCENARIO ──
+  if(screen==='scenario'){
+    const SceneComp=SCENES[round-1];
+    const text=rd.scenario(cn,gs);
+    const parts=text.split('\n\n');
+    return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — ${rd.short}`}/>
+        <SceneComp/>
+        <p className="roletag">{rd.roleTitle(cn)}</p>
+        <div className="scenario">{parts.map((p,i)=><p key={i}>{p}</p>)}</div>
+        <div className="brow">
+          <button className="btn btn-a" onClick={()=>nav('dialogue')}>Hear them out</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── DIALOGUE ──
+  if(screen==='dialogue'){
+    const allPbsDone=rd.actors.every((a,ai)=>a.pbs.every((_,pi)=>pbsUsed[`${round}_${ai}_${pi}`]!==undefined));
+    return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — ${rd.short}`}/>
+        {rd.actors.map((actor,ai)=>{
+          const P=PORTRAITS[actor.portrait];
+          return(
+            <div key={ai} className={`acard${actor.offset?' offset':''}`}>
+              <div className="ahead">
+                <P/>
+                <div>
+                  <div className="aname">{actor.name}</div>
+                  <div className="atag">{actor.tag}</div>
+                  <p className="atext">{rv(actor.opening,cn)}</p>
+                </div>
+              </div>
+              <div className="pbgrid">
+                {actor.pbs.map((pb,pi)=>{
+                  const key=`${round}_${ai}_${pi}`;
+                  const done=pbsUsed[key]!==undefined;
+                  const qtext=rv(pb.q,cn);
+                  const atext=rv(pb.a,cn);
+                  const fntext=pb.fn?rv(pb.fn,cn):null;
+                  return(
+                    <div key={pi}>
+                      <button className={`pbbtn${done?' used':''}`}
+                        onClick={()=>!done&&setPbsUsed(prev=>({...prev,[key]:atext}))}>
+                        {qtext}
+                      </button>
+                      {done&&(
+                        <div className="pbres">
+                          {atext}
+                          {fntext&&<div className="footnote">{fntext}</div>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        <button className="btn btn-a" onClick={()=>{setPending(null);nav('choice');}}>Make your decision</button>
+      </div>
+    );
+  }
+
+  // ── CHOICE ──
+  if(screen==='choice')return(
+    <div className="wrap" style={{opacity:op}}>
+      <Prog title={`Round ${round} of 3 — ${rd.short}`}/>
+      <p className="eyebrow" style={{marginBottom:'1.25rem'}}>Your decision</p>
+      <div className="clist">
+        {rd.choices.map(c=>(
+          <div key={c.id} className="ccard" onClick={()=>{setPending(c.id);nav('confirm');}}>
+            <span className="cltr">{c.id}</span>
+            <div>
+              <div className="clbl">{c.label}</div>
+              <div className="cdsc">{c.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── CONFIRM ──
+  if(screen==='confirm'){
+    const chosen=rd.choices.find(c=>c.id===pending);
+    return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — ${rd.short}`}/>
+        <div className="cfbox">
+          <p className="eyebrow">You are choosing</p>
+          <p style={{fontSize:'22px',margin:'.5rem 0'}}>{chosen?.label}</p>
+          <p style={{fontSize:'14px',color:'var(--muted)'}}>{chosen?.desc}</p>
+          <p className="cfnote">This cannot be undone.</p>
+        </div>
+        <button className="btn btn-a" onClick={confirmChoice}>Confirm</button>
+      </div>
+    );
+  }
+
+  // ── DASHBOARD ──
+  if(screen==='dashboard')return(
+    <div className="wrap" style={{opacity:op}}>
+      <Prog title={`Round ${round} of 3 — Consequences`}/>
+      <div className="dgrid">
+        {METRICS.map(m=>{
+          const delta=prevDash?(dash[m.k]-prevDash[m.k]):0;
+          const good=(delta>0&&m.goodUp)||(delta<0&&!m.goodUp);
+          const bad=(delta>0&&!m.goodUp)||(delta<0&&m.goodUp);
+          const vc=good?'var(--teal)':bad?'var(--red)':'var(--text)';
+          const dc=good?'var(--teal)':bad?'var(--red)':'var(--muted)';
+          return(
+            <div key={m.k} className="metric">
+              <div className="mlbl">{m.lbl}</div>
+              <div className="mval" style={{color:delta!==0?vc:'var(--text)'}}>{disp[m.k]}</div>
+              <div className="mdlt" style={{color:dc}}>{delta>0?`+${delta}`:delta<0?`${delta}`:'—'}</div>
+              <div className="mhnt">{m.hint}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="brow">
+        <button className="btn btn-a" onClick={()=>nav('roleshift')}>See who else was affected</button>
+      </div>
+    </div>
+  );
+
+  // ── ROLE SHIFT ──
+  if(screen==='roleshift'){
+    // Round 1: Farmer dashboard
+    if(rd.roleShiftType==='farmer')return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — Another dashboard`}/>
+        <p style={{fontSize:'14px',color:'var(--muted)',fontStyle:'italic',marginBottom:'1.5rem'}}>
+          While you were deciding, she was notified.
+        </p>
+        <div className={`rs${rsShow?' show':''}`}>
+          <div className="fdash">
+            <div className="fdash-title">Household record — rural district</div>
+            <div className="frow">
+              <div className="fitem">
+                <div className="fkey">Water source</div>
+                <div className="fval">2km walk (seasonal stream)</div>
+              </div>
+              <div className="fitem">
+                <div className="fkey">Last harvest</div>
+                <div className="fval">Reduced by 30%</div>
+              </div>
+              <div className="fitem">
+                <div className="fkey">Ministry of Energy notification</div>
+                <div className="fval alert">Your land has been designated for infrastructure development.</div>
+              </div>
+            </div>
+          </div>
+          <p style={{fontSize:'14px',color:'var(--muted)',fontStyle:'italic',marginTop:'1rem'}}>
+            No GDP tracker. No emissions index. Just this.
+          </p>
+        </div>
+        <div className={`ctw${ctShow?' show':''}`}>
+          <button className="btn btn-a" onClick={()=>nav('whatsreal')}>Continue</button>
+        </div>
+      </div>
+    );
+
+    // Round 2: Survey
+    if(rd.roleShiftType==='survey')return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — A survey`}/>
+        <p style={{fontSize:'14px',color:'var(--muted)',fontStyle:'italic',marginBottom:'1.5rem'}}>
+          He was sent this. Once.
+        </p>
+        <div className={`rs${rsShow?' show':''}`}>
+          {rd.supplyChain&&(
+            <div className="schain">
+              {rd.supplyChain(cn).map((node,i,arr)=>(
+                <React.Fragment key={i}>
+                  <span className="scnode">{node}</span>
+                  {i<arr.length-1&&<span className="scarr">→</span>}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+          <div className="survey">
+            <div className="shead">Regional Agricultural Development Initiative — Consultation Form</div>
+            <div className="sq">Do you support agricultural development in your region?</div>
+            <div className="sopts">
+              <div className="sopt sopt-disabled">
+                <div className="scheckbox">&#160;</div>
+                <span>Yes</span>
+              </div>
+              <div className="sopt sopt-disabled">
+                <div className="scheckbox">&#160;</div>
+                <span>No</span>
+              </div>
+              <div className="sopt sopt-ticked">
+                <div className="scheckbox ticked">✓</div>
+                <span>I was not asked this question before the development began</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={`ctw${ctShow?' show':''}`}>
+          <button className="btn btn-a" onClick={()=>nav('whatsreal')}>Continue</button>
+        </div>
+      </div>
+    );
+
+    // Round 3: Portrait
+    return(
+      <div className="wrap" style={{opacity:op}}>
+        <Prog title={`Round ${round} of 3 — Outside the room`}/>
+        <hr className="divider"/>
+        <div className={`rs${rsShow?' show':''}`}>
+          <p className="rstext">{rd.roleShift(cn)}</p>
+        </div>
+        <div className={`ctw${ctShow?' show':''}`}>
+          <button className="btn btn-a" onClick={()=>nav('whatsreal')}>Continue</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── WHAT'S REAL ──
+  if(screen==='whatsreal')return(
+    <div className="wrap" style={{opacity:op}}>
+      <Prog title={`Round ${round} of 3 — ${rd.short}`}/>
+      <div className="wrpanel">
+        <p className="wrhead">What you didn't see</p>
+        <div className="wrsec">
+          <p className="wrlbl">What you saw</p>
+          <p className="wrtext">{rd.wr.saw}</p>
+        </div>
+        <div className="wrsec">
+          <p className="wrlbl">What was already true</p>
+          <p className="wrtext">{rd.wr.truth}</p>
+        </div>
+        {rd.wr.thinkers&&(
+          <div className="wrsec" style={{marginBottom:0}}>
+            <p className="wrlbl">Two views, unresolved</p>
+            <p className="wrtext">{rd.wr.thinkers}</p>
+          </div>
+        )}
+      </div>
+      <div className="brow">
+        <button className="btn btn-a" onClick={afterWhatsReal}>
+          {round<3?`Round ${round+1} →`:'See your results'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── REPORT ──
+  if(screen==='report')return(
+    <div className="wrap" style={{opacity:op}}>
+      <p className="eyebrow" style={{marginBottom:'1.75rem'}}>Summary</p>
+      <h2 style={{fontSize:'34px',fontWeight:300,marginBottom:'1.75rem'}}>{cn}</h2>
+      <div className="csummary">
+        {[0,1,2].map(i=>(
+          <div key={i}>Round {i+1}: {cn} <strong>{CHOICE_LABELS[i][choices[i]]}</strong>.</div>
+        ))}
+      </div>
+      <div className="dcards">
+        <div className="dcard">The world's richest 1% produce more carbon emissions per year than the poorest 50% combined.<div className="dsrc">Oxfam, 2023</div></div>
+        <div className="dcard">Each year, enough grain is fed to livestock to feed every undernourished person on the planet.<div className="dsrc"> Weis (2013) </div></div>
+        <div className="dcard">More than 70% of international climate finance is delivered as loans, not grants. The countries least responsible for climate change are being asked to borrow their way to safety.<div className="dsrc">OECD, 2022</div></div>
+      </div>
+      <div className="portrait">{getPortrait()}</div>
+      <p className="closing">Every path through this game was constrained before you began. The structure of the choices available to you was not neutral. That is the point.</p>
+    </div>
+  );
+
+  // ── DONE ──
+  return(
+    <div className="wrap" style={{opacity:op}}>
+      <div className="donewrap">
+        <p className="eyebrow" style={{letterSpacing:'.22em'}}> Can't Fool the Climate </p>
+        <p style={{fontSize:'26px',fontStyle:'italic',fontWeight:300,maxWidth:'440px',lineHeight:1.7,textAlign:'center'}}>
+          THE CONSTRAINED ROOM.
+        </p>
+        <p style={{fontSize:'18px',color:'var(--dim)',fontStyle:'italic',maxWidth:'380px',lineHeight:1.7,textAlign:'center'}}>
+          Created by Rohan Jacob.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
